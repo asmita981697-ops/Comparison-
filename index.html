@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Precision Compare | 5-Point Analysis</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --accent: #38bdf8;
+            --success: #10b981;
+            --text: #f8fafc;
+            --border: #334155;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 20px; 
+            margin: 0; 
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 16px; 
+            width: 100%; 
+            max-width: 900px; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); 
+        }
+
+        h1 { text-align: center; color: var(--primary); margin-bottom: 25px; }
+        
+        .inputs-container { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+        .topic-inputs { display: flex; gap: 12px; }
+        
+        input { 
+            flex: 1; 
+            padding: 14px; 
+            border-radius: 10px; 
+            border: 1px solid var(--border); 
+            background: #0f172a; 
+            color: white; 
+            outline: none; 
+            font-size: 1rem;
+        }
+        input:focus { border-color: var(--primary); }
+        
+        .action-area { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        button { 
+            width: 100%; 
+            max-width: 350px; 
+            padding: 15px 25px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.3s; 
+            font-size: 1rem; 
+        }
+        .btn-analyze { background: var(--primary); color: white; }
+        .btn-print { background: var(--success); color: white; display: none; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        
+        .status { text-align: center; color: #94a3b8; margin: 20px 0; font-size: 0.95rem; }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            display: none; 
+            table-layout: fixed; 
+            margin-top: 20px;
+        }
+
+        th, td { padding: 18px; border: 1px solid var(--border); text-align: left; line-height: 1.6; word-wrap: break-word; }
+        th { background: #0f172a; color: var(--primary); text-transform: uppercase; font-size: 0.8rem; }
+        
+        .basis-col { 
+            color: var(--accent); 
+            font-weight: bold; 
+            text-align: center; 
+            width: 130px; 
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .footer { 
+            text-align: center; 
+            margin-top: 40px; 
+            padding-top: 20px; 
+            border-top: 1px solid var(--border); 
+            color: #64748b; 
+            font-size: 0.8rem; 
+        }
+
+        @media print {
+            body { background: white; color: black; }
+            .card { border: none; background: white; width: 100%; box-shadow: none; }
+            .inputs-container, .action-area, .status, .footer { display: none !important; }
+            table { display: table !important; border: 2px solid #000; }
+            th, td { color: black !important; border: 1px solid #000; }
+            .basis-col { background: #f0f0f0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Topic Comparison</h1>
+        
+        <div class="inputs-container">
+            <div class="topic-inputs">
+                <input type="text" id="itemA" placeholder="Topic 1">
+                <input type="text" id="itemB" placeholder="Topic 2">
+            </div>
+            
+            <div class="action-area">
+                <button class="btn-analyze" onclick="startAnalysis()">Compare Topics (5 Points)</button>
+                <button id="printBtn" class="btn-print" onclick="window.print()">Export PDF Report</button>
+            </div>
+        </div>
+
+        <div id="status" class="status">Ready for analysis</div>
+        
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th id="labelA">Topic 1</th>
+                    <th class="basis-col">Feature</th>
+                    <th id="labelB">Topic 2</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+
+        <div class="footer">
+            Copyright &copy; 2026 Asmita Shrestha &trade;. All Rights Reserved.
+        </div>
+    </div>
+
+    <script>
+        async function startAnalysis() {
+            const a = document.getElementById('itemA').value.trim();
+            const b = document.getElementById('itemB').value.trim();
+            const status = document.getElementById('status');
+            
+            // USING THE KEY YOU PROVIDED
+            const key = "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"; 
+
+            if (!a || !b) {
+                alert("Please enter both topics!");
+                return;
+            }
+
+            status.innerText = "⚡ Analyzing 5 dimensions of comparison...";
+            document.getElementById('resultTable').style.display = "none";
+            
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${key}`, 
+                        "Content-Type": "application/json" 
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [{
+                            role: "system", 
+                            content: "Compare the topics across exactly 5 features. For each topic, provide one sentence of ~12 words. Return ONLY JSON: {'rows': [{'f': 'Feature Name', 'a': 'Topic 1 sentence', 'b': 'Topic 2 sentence'}]}"
+                        }, {
+                            role: "user", content: `Compare "${a}" and "${b}" in 5 rows.`
+                        }],
+                        response_format: { type: "json_object" }
+                    })
+                });
+
+                if (res.status === 401) throw new Error("Invalid API Key. Please check your Groq credentials.");
+                if (res.status === 429) throw new Error("API Limit reached. Please wait a moment.");
+                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+
+                const json = await res.json();
+                const result = JSON.parse(json.choices[0].message.content);
+
+                document.getElementById('labelA').innerText = a;
+                document.getElementById('labelB').innerText = b;
+                
+                document.getElementById('tableBody').innerHTML = result.rows.map(row => `
+                    <tr>
+                        <td>${row.a}</td>
+                        <td class="basis-col">${row.f}</td>
+                        <td>${row.b}</td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('resultTable').style.display = "table";
+                document.getElementById('printBtn').style.display = "block";
+                status.innerText = "✅ Analysis Complete (5 Points)";
+            } catch (err) {
+                status.innerText = "❌ Error: " + err.message;
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
